@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stopColor="#0f172a" />
+      <stop offset="100%" stopColor="#1e293b" />
+    </linearGradient>
+    <linearGradient id="emeraldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stopColor="#10b981" />
+      <stop offset="100%" stopColor="#059669" />
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="12" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Squircle Background with 15% safe-zone margin for Android maskable -->
+  <rect width="512" height="512" rx="128" fill="url(#bgGrad)" />
+
+  <!-- Outer Neon Ring Accent -->
+  <rect x="24" y="24" width="464" height="464" rx="112" stroke="#10b981" stroke-width="6" stroke-opacity="0.25" />
+
+  <!-- Center Runner Graphic -->
+  <g transform="translate(140, 100) scale(1.6)" filter="url(#glow)">
+    <!-- Head -->
+    <circle cx="75" cy="24" r="14" fill="#10b981" />
+    
+    <!-- Torso -->
+    <path d="M68 44L56 86L72 90L84 54Z" fill="#10b981" />
+    
+    <!-- Arms -->
+    <path d="M72 52L96 68L114 60M66 54L44 64L32 52" stroke="#10b981" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" />
+    
+    <!-- Legs -->
+    <path d="M58 86L30 116L16 150M70 88L92 120L116 138" stroke="#10b981" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" />
+  </g>
+
+  <!-- Dynamic ECG Heart Pulse Line -->
+  <path d="M48 380H160L190 320L220 440L250 350L280 400H464" stroke="#34d399" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" />
+</svg>

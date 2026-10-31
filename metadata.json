@@ -1,0 +1,11 @@
+{
+  "name": "FitTrack - Smart Fitness & Health Monitoring",
+  "description": "Intelligent fitness tracking application with GPS route tracking, live heart rate monitoring, NFC device identification, personalized daily exercise guides, and workout scheduling.",
+  "requestFramePermissions": [
+    "geolocation",
+    "notifications"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
