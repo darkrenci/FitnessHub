@@ -77,3 +77,27 @@ test('StorageService.logout clears current session', () => {
   StorageService.logout();
   assert.equal(StorageService.getCurrentUserEmail(), null);
 });
+
+test('StorageService.clearTodayWorkouts removes only today items', () => {
+  StorageService.saveWorkout({
+    id: 'test_wkt_today',
+    userId: 'usr_default_01',
+    activityType: 'running',
+    title: 'Test Today',
+    startTime: Date.now(),
+    endTime: Date.now() + 600000,
+    durationSeconds: 600,
+    distanceKm: 1.5,
+    caloriesBurned: 100,
+    steps: 1500,
+    avgPaceSecondsPerKm: 400,
+    bestPaceSecondsPerKm: 380,
+    routeCoordinates: [],
+  });
+
+  const remaining = StorageService.clearTodayWorkouts();
+  const hasToday = remaining.some(
+    (w) => new Date(w.startTime).toDateString() === new Date().toDateString()
+  );
+  assert.equal(hasToday, false);
+});

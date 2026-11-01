@@ -20,6 +20,7 @@ interface HomeScreenProps {
   onOpenGuide: () => void;
   onOpenHeartRate: () => void;
   onOpenProfile: () => void;
+  onClearTodayWorkouts?: () => void;
 }
 
 export const HomeScreen: React.FC<HomeScreenProps> = ({
@@ -31,29 +32,24 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   onOpenGuide,
   onOpenHeartRate,
   onOpenProfile,
+  onClearTodayWorkouts,
 }) => {
-  // Today's aggregated activity
+  // Today's aggregated activity strictly from saved workouts
   const todayWorkouts = workouts.filter(
     (w) => new Date(w.startTime).toDateString() === new Date().toDateString()
   );
 
-  const todayDistance = todayWorkouts.length > 0
-    ? todayWorkouts.reduce((acc, w) => acc + w.distanceKm, 0)
-    : 3.25;
+  const todayDistance = todayWorkouts.reduce((acc, w) => acc + (w.distanceKm || 0), 0);
+  const todayMinutes = Math.round(
+    todayWorkouts.reduce((acc, w) => acc + (w.durationSeconds || 0), 0) / 60
+  );
+  const todayCalories = todayWorkouts.reduce((acc, w) => acc + (w.caloriesBurned || 0), 0);
+  const todaySteps = todayWorkouts.reduce(
+    (acc, w) => acc + (w.steps || Math.round((w.distanceKm || 0) * 1250)),
+    0
+  );
 
-  const todayMinutes = todayWorkouts.length > 0
-    ? Math.round(todayWorkouts.reduce((acc, w) => acc + w.durationSeconds, 0) / 60)
-    : 28;
-
-  const todayCalories = todayWorkouts.length > 0
-    ? todayWorkouts.reduce((acc, w) => acc + w.caloriesBurned, 0)
-    : 312;
-
-  const todaySteps = todayWorkouts.length > 0
-    ? todayWorkouts.reduce((acc, w) => acc + (w.steps || Math.round(w.distanceKm * 1250)), 0)
-    : 4892;
-
-  const currentBpm = heartRate ? heartRate.bpm : 72;
+  const currentBpm = heartRate && heartRate.bpm > 0 ? heartRate.bpm : 72;
 
   return (
     <div className="flex-1 min-h-[640px] flex flex-col justify-between bg-[#f8fafc] text-slate-800 px-5 pb-5">
@@ -87,55 +83,79 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
       </div>
 
       {/* Today's Activity Card */}
-      <div className="p-5 rounded-3xl bg-white border border-slate-200/90 shadow-sm mb-4 flex items-center justify-between">
-        <div>
-          <span className="text-xs text-slate-500 font-semibold tracking-wide uppercase">
-            Today's Activity
-          </span>
-          <div className="flex items-baseline space-x-1.5 mt-1">
-            <span className="text-3xl font-black text-slate-900 font-mono tracking-tight">
-              {todayDistance.toFixed(2)}
-            </span>
-            <span className="text-sm font-bold text-slate-600">km</span>
-          </div>
-          <div className="text-xs text-slate-500 font-medium mt-1">
-            {todayMinutes} min • {todayCalories} cal
-          </div>
-        </div>
+      {(() => {
+        const dailyTargetKm = (profile.targetWeeklyDistanceKm || 20) / 7;
+        const progressPercent = Math.min(100, Math.round((todayDistance / (dailyTargetKm || 3)) * 100));
+        const strokeDashoffset = Math.round(201 - (201 * (progressPercent / 100)));
 
-        {/* Circular Progress Ring */}
-        <div className="relative w-20 h-20 flex items-center justify-center">
-          <svg className="w-20 h-20 -rotate-90" viewBox="0 0 80 80">
-            {/* Background Track */}
-            <circle
-              cx="40"
-              cy="40"
-              r="32"
-              fill="none"
-              stroke="#e2e8f0"
-              strokeWidth="6"
-            />
-            {/* Progress Arc (~65%) */}
-            <circle
-              cx="40"
-              cy="40"
-              r="32"
-              fill="none"
-              stroke="#10b981"
-              strokeWidth="6"
-              strokeDasharray="201"
-              strokeDashoffset="65"
-              strokeLinecap="round"
-            />
-          </svg>
-          {/* Inner Runner Icon */}
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600">
-              <Footprints className="w-5 h-5" />
+        return (
+          <div className="p-5 rounded-3xl bg-white border border-slate-200/90 shadow-sm mb-4 flex items-center justify-between">
+            <div>
+              <div className="flex items-center space-x-2">
+                <span className="text-xs text-slate-500 font-semibold tracking-wide uppercase">
+                  Today's Activity
+                </span>
+                {todayWorkouts.length > 0 && onClearTodayWorkouts && (
+                  <button
+                    type="button"
+                    onClick={onClearTodayWorkouts}
+                    className="text-[10px] font-semibold text-rose-500 hover:text-rose-700 bg-rose-50 px-2 py-0.5 rounded-full border border-rose-200"
+                    title="Clear today's recorded workouts"
+                  >
+                    Reset Today
+                  </button>
+                )}
+              </div>
+              <div className="flex items-baseline space-x-1.5 mt-1">
+                <span className="text-3xl font-black text-slate-900 font-mono tracking-tight">
+                  {todayDistance.toFixed(2)}
+                </span>
+                <span className="text-sm font-bold text-slate-600">km</span>
+              </div>
+              <div className="text-xs text-slate-500 font-medium mt-1">
+                {todayWorkouts.length === 0 ? (
+                  <span>Ready to track • 0 cal</span>
+                ) : (
+                  <span>{todayMinutes} min • {todayCalories} cal</span>
+                )}
+              </div>
+            </div>
+
+            {/* Circular Progress Ring */}
+            <div className="relative w-20 h-20 flex items-center justify-center">
+              <svg className="w-20 h-20 -rotate-90" viewBox="0 0 80 80">
+                {/* Background Track */}
+                <circle
+                  cx="40"
+                  cy="40"
+                  r="32"
+                  fill="none"
+                  stroke="#e2e8f0"
+                  strokeWidth="6"
+                />
+                {/* Dynamic Progress Arc */}
+                <circle
+                  cx="40"
+                  cy="40"
+                  r="32"
+                  fill="none"
+                  stroke="#10b981"
+                  strokeWidth="6"
+                  strokeDasharray="201"
+                  strokeDashoffset={strokeDashoffset}
+                  strokeLinecap="round"
+                />
+              </svg>
+              {/* Inner Runner Icon */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600">
+                  <Footprints className="w-5 h-5" />
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      </div>
+        );
+      })()}
 
       {/* 3 Metric Cards Row (Heart Rate, Cal, Steps) */}
       <div className="grid grid-cols-3 gap-3 mb-4">

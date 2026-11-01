@@ -96,6 +96,11 @@ export default function App() {
     navigateTo('home');
   };
 
+  const handleClearTodayWorkouts = () => {
+    const updated = StorageService.clearTodayWorkouts();
+    setWorkouts(updated);
+  };
+
   const handleLogOut = () => {
     StorageService.logout();
     navigateTo('login');
@@ -157,6 +162,7 @@ export default function App() {
               onOpenGuide={() => navigateTo('daily_guide')}
               onOpenHeartRate={() => navigateTo('heart_rate')}
               onOpenProfile={() => navigateTo('profile')}
+              onClearTodayWorkouts={handleClearTodayWorkouts}
             />
           )}
 

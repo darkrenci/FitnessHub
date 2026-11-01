@@ -491,6 +491,15 @@ export const StorageService = {
     return workouts;
   },
 
+  clearTodayWorkouts(): Workout[] {
+    const todayStr = new Date().toDateString();
+    const workouts = this.getWorkouts().filter(
+      (w) => new Date(w.startTime).toDateString() !== todayStr
+    );
+    setStored(STORAGE_KEYS.WORKOUTS, workouts);
+    return workouts;
+  },
+
   getSchedule(): ScheduledWorkout[] {
     return getStored<ScheduledWorkout[]>(STORAGE_KEYS.SCHEDULE, DEFAULT_SCHEDULE);
   },
